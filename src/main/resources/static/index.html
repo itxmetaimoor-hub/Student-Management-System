@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura | Student Management System</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dark-mode">
+
+    <!-- Glowing Background blobs -->
+    <div class="blob-container">
+        <div class="blob blob-purple"></div>
+        <div class="blob blob-blue"></div>
+        <div class="blob blob-cyan"></div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- AUTHENTICATION VIEW -->
+    <main id="auth-container" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo">
+                    <i data-lucide="graduation-cap"></i>
+                    <span>AURA</span>
+                </div>
+                <h2>Welcome Back</h2>
+                <p>Please enter your details to access the portal</p>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="auth-tabs">
+                <button type="button" class="tab-btn active" onclick="switchAuthTab('login')">Login</button>
+                <button type="button" class="tab-btn" onclick="switchAuthTab('register')">Register</button>
+                <div class="tab-slider"></div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <div class="input-icon-wrapper">
+                        <i data-lucide="user"></i>
+                        <input type="text" id="login-username" placeholder="Enter username" required autocomplete="username">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <div class="input-icon-wrapper">
+                        <i data-lucide="lock"></i>
+                        <input type="password" id="login-password" placeholder="Enter password" required autocomplete="current-password">
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <span>Sign In</span>
+                    <i data-lucide="arrow-right"></i>
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="auth-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="register-username">Username</label>
+                    <div class="input-icon-wrapper">
+                        <i data-lucide="user"></i>
+                        <input type="text" id="register-username" placeholder="Choose a username" required autocomplete="username">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <div class="input-icon-wrapper">
+                        <i data-lucide="lock"></i>
+                        <input type="password" id="register-password" placeholder="Choose a strong password" required autocomplete="new-password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="register-role">Assign Role</label>
+                    <div class="input-icon-wrapper">
+                        <i data-lucide="shield"></i>
+                        <select id="register-role" required>
+                            <option value="" disabled selected>Select user role</option>
+                            <option value="ADMIN">ADMIN (Full Control)</option>
+                            <option value="TEACHER">TEACHER (Subject & Attendance)</option>
+                            <option value="STUDENT">STUDENT (Enrollments & Views)</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn btn-register">
+                    <span>Create Account</span>
+                    <i data-lucide="user-plus"></i>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="app-container" class="app-container hidden">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i data-lucide="graduation-cap"></i>
+                    <span>AURA</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <button type="button" class="nav-item active" onclick="showSection('dashboard')">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button type="button" class="nav-item" id="nav-students" onclick="showSection('students')">
+                    <i data-lucide="users"></i>
+                    <span>Students</span>
+                </button>
+                <button type="button" class="nav-item" id="nav-teachers" onclick="showSection('teachers')">
+                    <i data-lucide="award"></i>
+                    <span>Teachers</span>
+                </button>
+                <button type="button" class="nav-item" id="nav-courses" onclick="showSection('courses')">
+                    <i data-lucide="book-open"></i>
+                    <span>Courses</span>
+                </button>
+                <button type="button" class="nav-item" id="nav-attendance" onclick="showSection('attendance')">
+                    <i data-lucide="calendar-check"></i>
+                    <span>Attendance</span>
+                </button>
+                <button type="button" class="nav-item" id="nav-enrollments" onclick="showSection('enrollments')">
+                    <i data-lucide="user-check"></i>
+                    <span>Enrollments</span>
+                </button>
+                <button type="button" class="nav-item" id="nav-results" onclick="showSection('results')">
+                    <i data-lucide="trending-up"></i>
+                    <span>Results</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button type="button" class="logout-btn" onclick="handleLogout()">
+                    <i data-lucide="log-out"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Body -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-left">
+                    <h1 id="section-title">Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <div class="user-profile">
+                        <span id="user-display-name">Username</span>
+                        <span id="user-display-role" class="role-badge">Role</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- SECTIONS -->
+            <div class="content-body">
+                <!-- Dashboard Overview -->
+                <section id="sec-dashboard" class="content-section active">
+                    <div class="grid-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon purple"><i data-lucide="users"></i></div>
+                            <div class="stat-details">
+                                <h3 id="stat-students-count">-</h3>
+                                <p>Active Students</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i data-lucide="book-open"></i></div>
+                            <div class="stat-details">
+                                <h3 id="stat-courses-count">-</h3>
+                                <p>Offered Courses</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon cyan"><i data-lucide="award"></i></div>
+                            <div class="stat-details">
+                                <h3 id="stat-teachers-count">-</h3>
+                                <p>Faculty Members</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-hero">
+                        <h2>Welcome to Aura Management System</h2>
+                        <p>Your current user role determines what features and actions are available to you. Navigate through the sidebar menu to get started.</p>
+                        <div class="role-explanation">
+                            <h4>Your Role Permissions:</h4>
+                            <ul id="permissions-list">
+                                <!-- Loaded dynamically -->
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Students Section -->
+                <section id="sec-students" class="content-section">
+                    <div class="section-actions">
+                        <h2>Student Directory</h2>
+                        <button type="button" class="action-btn" id="btn-add-student-trigger" onclick="openModal('modal-student')">
+                            <i data-lucide="plus"></i>
+                            <span>Add Student</span>
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="tbl-students">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Course</th>
+                                    <th>Age</th>
+                                    <th class="col-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Teachers Section -->
+                <section id="sec-teachers" class="content-section">
+                    <div class="section-actions">
+                        <h2>Faculty Members</h2>
+                        <button type="button" class="action-btn" id="btn-add-teacher-trigger" onclick="openModal('modal-teacher')">
+                            <i data-lucide="plus"></i>
+                            <span>Add Teacher</span>
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="tbl-teachers">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Subject</th>
+                                    <th>Email</th>
+                                    <th class="col-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Courses Section -->
+                <section id="sec-courses" class="content-section">
+                    <div class="section-actions">
+                        <h2>Curriculum Courses</h2>
+                        <button type="button" class="action-btn" id="btn-add-course-trigger" onclick="openModal('modal-course')">
+                            <i data-lucide="plus"></i>
+                            <span>Add Course</span>
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="tbl-courses">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Instructor</th>
+                                    <th class="col-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Attendance Section -->
+                <section id="sec-attendance" class="content-section">
+                    <div class="section-actions">
+                        <h2>Attendance Logging</h2>
+                        <button type="button" class="action-btn" id="btn-add-attendance-trigger" onclick="openModal('modal-attendance')">
+                            <i data-lucide="calendar-plus"></i>
+                            <span>Record Attendance</span>
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="tbl-attendance">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student ID</th>
+                                    <th>Course ID</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Enrollments Section -->
+                <section id="sec-enrollments" class="content-section">
+                    <div class="section-actions">
+                        <h2>Course Enrollments</h2>
+                        <button type="button" class="action-btn" id="btn-add-enrollment-trigger" onclick="openModal('modal-enrollment')">
+                            <i data-lucide="user-plus"></i>
+                            <span>Register Enrollment</span>
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="tbl-enrollments">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student ID</th>
+                                    <th>Course ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Results Section -->
+                <section id="sec-results" class="content-section">
+                    <div class="section-actions">
+                        <h2>Academic Results</h2>
+                        <button type="button" class="action-btn" id="btn-add-result-trigger" onclick="openModal('modal-result')">
+                            <i data-lucide="plus"></i>
+                            <span>Add Result</span>
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="tbl-results">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student ID</th>
+                                    <th>Course ID</th>
+                                    <th>Marks</th>
+                                    <th>Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Student Modal -->
+    <div id="modal-student" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="student-modal-title">Add Student</h3>
+                <button type="button" class="close-btn" onclick="closeModal('modal-student')">&times;</button>
+            </div>
+            <form id="form-student" onsubmit="saveStudent(event)">
+                <input type="hidden" id="student-id">
+                <div class="form-group">
+                    <label for="student-name">Full Name</label>
+                    <input type="text" id="student-name" required placeholder="E.g., John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="student-course">Course Name</label>
+                    <input type="text" id="student-course" required placeholder="E.g., BSCS">
+                </div>
+                <div class="form-group">
+                    <label for="student-age">Age</label>
+                    <input type="number" id="student-age" required min="1" max="120" placeholder="E.g., 20">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="cancel-btn" onclick="closeModal('modal-student')">Cancel</button>
+                    <button type="submit" class="save-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Teacher Modal -->
+    <div id="modal-teacher" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="teacher-modal-title">Add Teacher</h3>
+                <button type="button" class="close-btn" onclick="closeModal('modal-teacher')">&times;</button>
+            </div>
+            <form id="form-teacher" onsubmit="saveTeacher(event)">
+                <input type="hidden" id="teacher-id">
+                <div class="form-group">
+                    <label for="teacher-name">Name</label>
+                    <input type="text" id="teacher-name" required placeholder="E.g., Prof. Miller">
+                </div>
+                <div class="form-group">
+                    <label for="teacher-subject">Subject</label>
+                    <input type="text" id="teacher-subject" required placeholder="E.g., Computer Networks">
+                </div>
+                <div class="form-group">
+                    <label for="teacher-email">Email Address</label>
+                    <input type="email" id="teacher-email" required placeholder="E.g., miller@aura.edu">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="cancel-btn" onclick="closeModal('modal-teacher')">Cancel</button>
+                    <button type="submit" class="save-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Course Modal -->
+    <div id="modal-course" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="course-modal-title">Add Course</h3>
+                <button type="button" class="close-btn" onclick="closeModal('modal-course')">&times;</button>
+            </div>
+            <form id="form-course" onsubmit="saveCourse(event)">
+                <input type="hidden" id="course-id">
+                <div class="form-group">
+                    <label for="course-title">Course Title</label>
+                    <input type="text" id="course-title" required placeholder="E.g., Introduction to Java">
+                </div>
+                <div class="form-group">
+                    <label for="course-instructor">Instructor Name</label>
+                    <input type="text" id="course-instructor" required placeholder="E.g., Dr. Smith">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="cancel-btn" onclick="closeModal('modal-course')">Cancel</button>
+                    <button type="submit" class="save-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Attendance Modal -->
+    <div id="modal-attendance" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Record Attendance</h3>
+                <button type="button" class="close-btn" onclick="closeModal('modal-attendance')">&times;</button>
+            </div>
+            <form id="form-attendance" onsubmit="saveAttendance(event)">
+                <div class="form-group">
+                    <label for="attendance-student-id">Student ID</label>
+                    <input type="number" id="attendance-student-id" required placeholder="Student ID number">
+                </div>
+                <div class="form-group">
+                    <label for="attendance-course-id">Course ID</label>
+                    <input type="number" id="attendance-course-id" required placeholder="Course ID number">
+                </div>
+                <div class="form-group">
+                    <label for="attendance-date">Date</label>
+                    <input type="date" id="attendance-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="attendance-status">Status</label>
+                    <select id="attendance-status" required>
+                        <option value="" disabled selected>Select Status</option>
+                        <option value="Present">Present</option>
+                        <option value="Absent">Absent</option>
+                        <option value="Late">Late</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="cancel-btn" onclick="closeModal('modal-attendance')">Cancel</button>
+                    <button type="submit" class="save-btn">Submit Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Enrollment Modal -->
+    <div id="modal-enrollment" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Register Enrollment</h3>
+                <button type="button" class="close-btn" onclick="closeModal('modal-enrollment')">&times;</button>
+            </div>
+            <form id="form-enrollment" onsubmit="saveEnrollment(event)">
+                <div class="form-group">
+                    <label for="enrollment-student-id">Student ID</label>
+                    <input type="number" id="enrollment-student-id" required placeholder="Student ID number">
+                </div>
+                <div class="form-group">
+                    <label for="enrollment-course-id">Course ID</label>
+                    <input type="number" id="enrollment-course-id" required placeholder="Course ID number">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="cancel-btn" onclick="closeModal('modal-enrollment')">Cancel</button>
+                    <button type="submit" class="save-btn">Confirm Enrollment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Result Modal -->
+    <div id="modal-result" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Record Academic Result</h3>
+                <button type="button" class="close-btn" onclick="closeModal('modal-result')">&times;</button>
+            </div>
+            <form id="form-result" onsubmit="saveResult(event)">
+                <div class="form-group">
+                    <label for="result-student-id">Student ID</label>
+                    <input type="number" id="result-student-id" required placeholder="Student ID number">
+                </div>
+                <div class="form-group">
+                    <label for="result-course-id">Course ID</label>
+                    <input type="number" id="result-course-id" required placeholder="Course ID number">
+                </div>
+                <div class="form-group">
+                    <label for="result-marks">Marks (0-100)</label>
+                    <input type="number" id="result-marks" min="0" max="100" required placeholder="Marks scored" oninput="calculateGrade(this.value)">
+                </div>
+                <div class="form-group">
+                    <label for="result-grade">Grade</label>
+                    <input type="text" id="result-grade" readonly placeholder="Auto-calculated">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="cancel-btn" onclick="closeModal('modal-result')">Cancel</button>
+                    <button type="submit" class="save-btn">Publish Result</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script -->
+    <script src="app.js"></script>
+</body>
+</html>
